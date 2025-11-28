@@ -1,18 +1,48 @@
 {
-  "version": 2,
-  "functions": {
-    "api/**/*.js": {
-      "includeFiles": "lib/**"
+  "rewrites": [
+    {
+      "source": "/api/register-main-app-user",
+      "destination": "/api/users?action=register-main-app-user"
+    },
+    {
+      "source": "/api/validate-user",
+      "destination": "/api/users?action=validate-user"
+    },
+    {
+      "source": "/api/get-user-data",
+      "destination": "/api/users?action=get-user-data"
+    },
+    {
+      "source": "/api/check-admin",
+      "destination": "/api/users?action=check-admin"
+    },
+    {
+      "source": "/api/admin-login",
+      "destination": "/api/users?action=admin-login"
+    },
+    {
+      "source": "/api/submit-payment",
+      "destination": "/api/payments?action=submit-payment"
+    },
+    {
+      "source": "/api/approve-payment",
+      "destination": "/api/payments?action=approve-payment"
+    },
+    {
+      "source": "/api/get-pending-payments",
+      "destination": "/api/payments?action=get-pending-payments"
+    },
+    {
+      "source": "/api/get-user-payments",
+      "destination": "/api/payments?action=get-user-payments"
+    },
+    {
+      "source": "/api/send-sms",
+      "destination": "/api/sms?action=send-sms"
+    },
+    {
+      "source": "/api/check-sms-credits",
+      "destination": "/api/sms?action=check-sms-credits"
     }
-  },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|ico|json|svg|webp))", "dest": "/$1" },
-    { "src": "/admin-login", "dest": "/admin-login.html" },
-    { "src": "/admin-panel", "dest": "/admin-panel.html" },
-    { "src": "/dashboard", "dest": "/dashboard.html" },
-    { "src": "/login", "dest": "/login.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
-
