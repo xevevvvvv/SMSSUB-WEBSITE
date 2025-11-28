@@ -38,6 +38,8 @@ export default async function handler(req, res) {
             return sendSms(req, res);
         case 'check-sms-credits':
             return checkSmsCreditsEndpoint(req, res);
+        case 'deduct-sms-credit':
+            return deductSmsCreditEndpoint(req, res);
         default:
             return res.status(400).json({ error: 'Invalid action' });
     }
@@ -141,6 +143,38 @@ async function checkSmsCreditsEndpoint(req, res) {
     } catch (error) {
         console.error('Check credits error:', error);
         return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+// --- Deduct SMS Credit Endpoint ---
+async function deductSmsCreditEndpoint(req, res) {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    try {
+        const { userEmail } = req.body;
+        if (!userEmail) return res.status(400).json({ error: 'Email required' });
+
+        // Deduct credit using the existing helper function
+        await deductSmsCredit(userEmail);
+
+        // Get updated credit count
+        const creditInfo = await checkSmsCreditsLogic(userEmail);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Credit deducted successfully',
+            data: {
+                userEmail,
+                smsCredits: creditInfo.creditsRemaining,
+                hasCredits: creditInfo.hasCredits
+            }
+        });
+    } catch (error) {
+        console.error('Deduct credit error:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message 
+        });
     }
 }
 

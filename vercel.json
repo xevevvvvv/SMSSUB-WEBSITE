@@ -43,6 +43,10 @@
     {
       "source": "/api/check-sms-credits",
       "destination": "/api/sms?action=check-sms-credits"
+    },
+    {
+      "source": "/api/deduct-sms-credit",
+      "destination": "/api/sms?action=deduct-sms-credit"
     }
   ]
 }
