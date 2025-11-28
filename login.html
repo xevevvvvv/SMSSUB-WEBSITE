@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SMS Credits</title>
+    <link rel="icon" href="../assets/icon.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="back-link" style="position: absolute; top: 2rem; left: 2rem;">
+            <a href="index.html" style="color: white; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+
+        <div class="card auth-card animate-fade-in">
+            <div class="auth-header">
+                <div style="font-size: 3rem; color: var(--primary-light); margin-bottom: 1rem;">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Enter your Ticketmaster email to access your SMS credits.</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <input type="email" id="email" name="email" class="input-field" placeholder=" " required>
+                    <label for="email" class="input-label">Email Address</label>
+                    <div class="error-message" id="emailError"
+                        style="color: #ff4d4d; font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn" style="width: 100%;">
+                    <span class="button-text">Login</span>
+                    <span class="button-loading" style="display: none;"><i class="fas fa-spinner fa-spin"></i> Logging
+                        in...</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <p style="font-size: 0.9rem;">Don't have an account? <a href="#" onclick="showSignup()"
+                            style="color: var(--primary-light); font-weight: 600;">Sign up</a></p>
+                </div>
+            </form>
+
+            <!-- Signup Form (hidden by default) -->
+            <form id="signupForm" class="login-form" style="display: none;">
+                <div class="input-group">
+                    <input type="email" id="signupEmail" name="email" class="input-field" placeholder=" " required>
+                    <label for="signupEmail" class="input-label">Email Address</label>
+                    <div class="error-message" id="signupEmailError"
+                        style="color: #ff4d4d; font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="confirmEmail" name="confirmEmail" class="input-field" placeholder=" "
+                        required>
+                    <label for="confirmEmail" class="input-label">Confirm Email</label>
+                    <div class="error-message" id="confirmEmailError"
+                        style="color: #ff4d4d; font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="signupBtn" style="width: 100%;">
+                    <span class="button-text">Create Account</span>
+                    <span class="button-loading" style="display: none;"><i class="fas fa-spinner fa-spin"></i>
+                        Creating...</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <p style="font-size: 0.9rem;">Already have an account? <a href="#" onclick="showLogin()"
+                            style="color: var(--primary-light); font-weight: 600;">Login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+</body>
+
+</html>

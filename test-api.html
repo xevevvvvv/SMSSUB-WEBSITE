@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Site API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0f1014;
+            color: white;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .test-section {
+            background: #1a1c24;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        button {
+            background: #1a5af5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1a4ae5;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: white;
+        }
+        pre {
+            background: #05080f;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #00ff88; }
+        .error { color: #ff4d4d; }
+        h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Subscription Site API Tester</h1>
+    <p>Use this tool to test API endpoints before deployment</p>
+    
+    <div class="container">
+        <div class="test-section">
+            <h2>Configuration</h2>
+            <label>API Base URL:</label>
+            <input type="text" id="apiBase" value="http://localhost:3000/api" placeholder="http://localhost:3000/api">
+            
+            <label>Test Email:</label>
+            <input type="email" id="testEmail" value="test@example.com" placeholder="test@example.com">
+            
+            <label>Test Amount:</label>
+            <input type="number" id="testAmount" value="10" placeholder="10">
+        </div>
+        
+        <div class="test-section">
+            <h2>User Data APIs</h2>
+            <button onclick="testGetUserData()">Get User Data</button>
+            <button onclick="testRegisterUser()">Register User</button>
+            <button onclick="testValidateUser()">Validate User</button>
+            <pre id="userDataResult">Click a button to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>Payment APIs</h2>
+            <button onclick="testGetPayments()">Get User Payments</button>
+            <button onclick="testSubmitPayment()">Submit Payment</button>
+            <button onclick="testGetPendingPayments()">Get Pending Payments</button>
+            <pre id="paymentResult">Click a button to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>SMS Credits API</h2>
+            <button onclick="testCheckCredits()">Check SMS Credits</button>
+            <pre id="creditsResult">Click a button to test...</pre>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = () => document.getElementById('apiBase').value || 'http://localhost:3000/api';
+        const TEST_EMAIL = () => document.getElementById('testEmail').value || 'test@example.com';
+        const TEST_AMOUNT = () => parseFloat(document.getElementById('testAmount').value) || 10;
+        
+        async function makeRequest(endpoint, method = 'GET', body = null) {
+            const url = `${API_BASE()}${endpoint}`;
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) options.body = JSON.stringify(body);
+            
+            try {
+                const res = await fetch(url, options);
+                const data = await res.json();
+                return { success: res.ok, status: res.status, data };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function testGetUserData() {
+            const result = document.getElementById('userDataResult');
+            result.textContent = 'Loading...';
+            
+            const response = await makeRequest('/get-user-data', 'POST', {
+                userEmail: TEST_EMAIL()
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+        
+        async function testRegisterUser() {
+            const result = document.getElementById('userDataResult');
+            result.textContent = 'Loading...';
+            
+            const response = await makeRequest('/register-main-app-user', 'POST', {
+                email: TEST_EMAIL(),
+                name: 'Test User',
+                location: 'Test Location',
+                country: 'US'
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+        
+        async function testValidateUser() {
+            const result = document.getElementById('userDataResult');
+            result.textContent = 'Loading...';
+            
+            const response = await makeRequest('/validate-user', 'POST', {
+                email: TEST_EMAIL()
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+        
+        async function testGetPayments() {
+            const result = document.getElementById('paymentResult');
+            result.textContent = 'Loading...';
+            
+            const response = await makeRequest('/get-user-payments', 'POST', {
+                userEmail: TEST_EMAIL()
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+        
+        async function testSubmitPayment() {
+            const result = document.getElementById('paymentResult');
+            result.textContent = 'Loading...';
+            
+            const txid = '0x' + Math.random().toString(16).substr(2, 40);
+            const response = await makeRequest('/submit-payment', 'POST', {
+                email: TEST_EMAIL(),
+                amount: TEST_AMOUNT(),
+                txid: txid
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+        
+        async function testGetPendingPayments() {
+            const result = document.getElementById('paymentResult');
+            result.textContent = 'Loading...';
+            
+            const response = await makeRequest('/get-pending-payments', 'GET');
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+        
+        async function testCheckCredits() {
+            const result = document.getElementById('creditsResult');
+            result.textContent = 'Loading...';
+            
+            const response = await makeRequest('/check-sms-credits', 'POST', {
+                userEmail: TEST_EMAIL()
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+            result.className = response.success ? 'success' : 'error';
+        }
+    </script>
+</body>
+</html>
+

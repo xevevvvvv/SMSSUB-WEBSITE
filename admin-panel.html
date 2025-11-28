@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Ticketmaster Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .log-container {
+            background: #0a0e17;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00f2ff;
+        }
+
+        .status-card.success {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .status-card.error {
+            border-color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.05);
+        }
+
+        .status-card.warning {
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        .status-card .status-number {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-card.success .status-number {
+            color: #00ff88;
+        }
+
+        .status-card.error .status-number {
+            color: #ff4d4d;
+        }
+
+        .status-card.warning .status-number {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo" style="margin-bottom: 2rem;">
+                <i class="fas fa-shield-alt"></i> TM Admin
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i> System Status
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-users"></i> User Management
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cogs"></i> Configuration
+                </a>
+            </nav>
+            <div style="margin-top: auto;">
+                <button class="btn btn-outline" onclick="logoutAdmin()"
+                    style="width: 100%; border-color: rgba(255,255,255,0.2); color: var(--text-secondary);">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header style="margin-bottom: 2rem;">
+                <h2>System Management</h2>
+                <p>Monitor and control the SMS infrastructure.</p>
+            </header>
+
+            <!-- Status Grid -->
+            <div class="stats-grid animate-fade-in">
+                <div class="stat-card status-card" id="mainAppStatus">
+                    <div class="status-number"><i class="fas fa-circle-notch fa-spin"></i></div>
+                    <div class="status-label">Main App Connection</div>
+                </div>
+                <div class="stat-card status-card" id="twilioStatus">
+                    <div class="status-number"><i class="fas fa-circle-notch fa-spin"></i></div>
+                    <div class="status-label">Twilio SMS</div>
+                </div>
+                <div class="stat-card status-card" id="emailStatus">
+                    <div class="status-number"><i class="fas fa-circle-notch fa-spin"></i></div>
+                    <div class="status-label">Email System</div>
+                </div>
+                <div class="stat-card status-card" id="userCount">
+                    <div class="status-number">0</div>
+                    <div class="status-label">Active Users</div>
+                </div>
+            </div>
+
+            <!-- System Controls -->
+            <div class="card animate-fade-in" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">System Controls</h3>
+                <div
+                    style="background: rgba(26, 82, 237, 0.1); border-left: 4px solid var(--primary-color); padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+                    <strong>Auto-Detection System:</strong> Users are automatically validated by checking if their email
+                    exists in the main app's account system.
+                </div>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="checkSystemStatus()">
+                        <i class="fas fa-sync-alt"></i> Refresh Status
+                    </button>
+                    <button class="btn btn-outline" style="border-color: #00ff88; color: #00ff88;"
+                        onclick="testMainAppConnection()">
+                        <i class="fas fa-plug"></i> Test Main App
+                    </button>
+                    <button class="btn btn-outline" style="border-color: #ff4d4d; color: #ff4d4d;"
+                        onclick="testSmsSystem()">
+                        <i class="fas fa-sms"></i> Test SMS System
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid-container"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+
+                <!-- Payment Requests -->
+                <div class="card animate-fade-in" style="grid-column: 1 / -1;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">Pending Payment Requests</h3>
+                        <button class="btn btn-primary" onclick="loadPaymentRequests()"
+                            style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table
+                            style="width: 100%; border-collapse: collapse; color: var(--text-secondary); font-size: 0.9rem;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
+                                    <th style="padding: 1rem;">Date</th>
+                                    <th style="padding: 1rem;">User Email</th>
+                                    <th style="padding: 1rem;">Amount</th>
+                                    <th style="padding: 1rem;">TXID</th>
+                                    <th style="padding: 1rem;">Status</th>
+                                    <th style="padding: 1rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentRequestsTable">
+                                <tr>
+                                    <td colspan="6" style="padding: 2rem; text-align: center;">Loading requests...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- User Validation Test -->
+                <div class="card animate-fade-in">
+                    <h3 style="margin-bottom: 1rem;">User Validation Test</h3>
+                    <div class="input-group">
+                        <input type="email" id="testEmail" class="input-field" placeholder=" " value="user@example.com">
+                        <label for="testEmail" class="input-label">Test Email Address</label>
+                    </div>
+                    <button class="btn btn-primary" onclick="testEmailValidation()" style="width: 100%;">
+                        Test Validation
+                    </button>
+                    <div id="validationResult" style="margin-top: 1rem; min-height: 20px;"></div>
+                </div>
+
+                <!-- System Logs -->
+                <div class="card animate-fade-in">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">System Logs</h3>
+                        <button class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.8rem;"
+                            onclick="clearLogs()">Clear</button>
+                    </div>
+                    <div class="log-container" id="systemLogs">
+                        <div>System logs will appear here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Info -->
+            <div class="card animate-fade-in" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Configuration</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Main App URL</div>
+                        <div style="font-family: monospace; color: var(--primary-light);" id="mainAppUrl">
+                            http://localhost:3000</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Validation Endpoint</div>
+                        <div style="font-family: monospace; color: var(--primary-light);">
+                            /api/validate-email-from-main-app</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Auto-Detection</div>
+                        <div style="color: #00ff88;">Enabled <i class="fas fa-check-circle"></i></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // System status checking
+        async function checkSystemStatus() {
+            addLog('Checking system status...');
+
+            // Check main app connection
+            try {
+                const response = await fetch('http://localhost:3000/api/check-env');
+                const data = await response.json();
+
+                updateStatusCard('mainAppStatus', '<i class="fas fa-check-circle"></i>', 'Main App Connected', 'success');
+                updateStatusCard('twilioStatus', data.sms?.twilio?.available ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>',
+                    data.sms?.twilio?.available ? 'Twilio Ready' : 'Twilio Not Configured',
+                    data.sms?.twilio?.available ? 'success' : 'error');
+                updateStatusCard('emailStatus', data.resend?.available || data.gmail?.available ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>',
+                    data.resend?.available || data.gmail?.available ? 'Email Ready' : 'Email Not Configured',
+                    data.resend?.available || data.gmail?.available ? 'success' : 'error');
+
+                addLog('System status check completed');
+            } catch (error) {
+                updateStatusCard('mainAppStatus', '<i class="fas fa-exclamation-triangle"></i>', 'Main App Offline', 'error');
+                addLog('Error checking system status: ' + error.message);
+            }
+        }
+
+        // Test main app connection
+        async function testMainAppConnection() {
+            addLog('Testing main app connection...');
+
+            try {
+                const response = await fetch('http://localhost:3000/api/check-env');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    addLog('✅ Main app connection successful');
+                    updateStatusCard('mainAppStatus', '<i class="fas fa-check-circle"></i>', 'Main App Online', 'success');
+                } else {
+                    addLog('❌ Main app connection failed');
+                    updateStatusCard('mainAppStatus', '<i class="fas fa-times-circle"></i>', 'Main App Error', 'error');
+                }
+            } catch (error) {
+                addLog('❌ Main app connection error: ' + error.message);
+                updateStatusCard('mainAppStatus', '<i class="fas fa-exclamation-triangle"></i>', 'Main App Offline', 'error');
+            }
+        }
+
+        // Test SMS system
+        async function testSmsSystem() {
+            addLog('Testing SMS system...');
+
+            try {
+                const response = await fetch('http://localhost:3000/api/send-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipientPhone: '+1234567890',
+                        recipientName: 'Admin Test',
+                        senderName: 'System Test',
+                        eventTitle: 'SMS System Test',
+                        eventDate: 'Test Date',
+                        eventVenue: 'Test Venue',
+                        section: 'Test',
+                        row: '1',
+                        seats: '1',
+                        ticketCount: 1,
+                        seatType: 'Test',
+                        userEmail: 'admin@ticketmasterpro.com'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('✅ SMS system test successful');
+                    updateStatusCard('twilioStatus', '<i class="fas fa-check-circle"></i>', 'SMS Working', 'success');
+                } else {
+                    addLog('❌ SMS system test failed: ' + data.error);
+                    updateStatusCard('twilioStatus', '<i class="fas fa-times-circle"></i>', 'SMS Failed', 'error');
+                }
+            } catch (error) {
+                addLog('❌ SMS system test error: ' + error.message);
+                updateStatusCard('twilioStatus', '<i class="fas fa-exclamation-triangle"></i>', 'SMS Error', 'error');
+            }
+        }
+
+        // Test email validation
+        async function testEmailValidation() {
+            const email = document.getElementById('testEmail').value;
+            const resultDiv = document.getElementById('validationResult');
+
+            if (!email) {
+                resultDiv.innerHTML = '<div style="color: #ff4d4d;">Please enter an email address</div>';
+                return;
+            }
+
+            addLog('Testing email validation for: ' + email);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/validate-email-from-main-app', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = '<div style="color: #00ff88;">✅ Email validated successfully - User has access</div>';
+                    addLog('✅ Email validation successful for: ' + email);
+                } else {
+                    resultDiv.innerHTML = '<div style="color: #ff4d4d;">❌ Email not found in main app - Access denied</div>';
+                    addLog('❌ Email validation failed for: ' + email);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div style="color: #ff4d4d;">❌ Validation error: ' + error.message + '</div>';
+                addLog('❌ Email validation error: ' + error.message);
+            }
+        }
+
+        // Update status card
+        function updateStatusCard(cardId, icon, text, type) {
+            const card = document.getElementById(cardId);
+            card.querySelector('.status-number').innerHTML = icon;
+            card.querySelector('.status-label').textContent = text;
+
+            // Reset classes
+            card.classList.remove('success', 'error', 'warning');
+            card.classList.add(type);
+        }
+
+        // Add log entry
+        function addLog(message) {
+            const logs = document.getElementById('systemLogs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span style="opacity:0.5">[${timestamp}]</span> ${message}`;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        // Clear logs
+        function clearLogs() {
+            document.getElementById('systemLogs').innerHTML = '<div>System logs cleared...</div>';
+        }
+
+        // Load payment requests
+        async function loadPaymentRequests() {
+            addLog('Fetching pending payments...');
+            const tableBody = document.getElementById('paymentRequestsTable');
+
+            const adminEmail = sessionStorage.getItem('adminEmail');
+            if (!adminEmail) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center; color: #ff4d4d;">Authentication required</td></tr>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/get-pending-payments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ adminEmail: adminEmail })
+                });
+                const data = await response.json();
+
+                if (data.success && data.payments.length > 0) {
+                    tableBody.innerHTML = data.payments.map(payment => `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem;">${new Date(payment.createdAt).toLocaleDateString()}</td>
+                            <td style="padding: 1rem;">${payment.email}</td>
+                            <td style="padding: 1rem; color: #00ff88;">$${payment.amount}</td>
+                            <td style="padding: 1rem; font-family: monospace;">${payment.txid.substring(0, 8)}...</td>
+                            <td style="padding: 1rem;"><span style="background: rgba(255, 204, 0, 0.1); color: #ffcc00; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Pending</span></td>
+                            <td style="padding: 1rem;">
+                                <button class="btn btn-primary" onclick="approvePayment('${payment.id}', '${payment.email}', ${payment.amount})" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                                    Approve
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    addLog(`Loaded ${data.payments.length} pending payments`);
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">No pending requests found</td></tr>';
+                    addLog('No pending payments found');
+                }
+            } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center; color: #ff4d4d;">Error loading requests</td></tr>';
+                addLog('Error fetching payments: ' + error.message);
+            }
+        }
+
+        // Approve payment
+        async function approvePayment(paymentId, email, amount) {
+            if (!confirm(`Approve payment of $${amount} for ${email}?`)) return;
+
+            addLog(`Approving payment for ${email}...`);
+
+            const adminEmail = sessionStorage.getItem('adminEmail');
+            if (!adminEmail) {
+                alert('Authentication required. Please login again.');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/approve-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId, email, amount, adminEmail: adminEmail })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog(`✅ Payment approved for ${email}. Credits added.`);
+                    loadPaymentRequests(); // Refresh list
+                } else {
+                    addLog(`❌ Approval failed: ${data.error}`);
+                    alert('Approval failed: ' + data.error);
+                }
+            } catch (error) {
+                addLog(`❌ Approval error: ${error.message}`);
+                alert('Error approving payment');
+            }
+        }
+
+        // Check admin authentication
+        async function checkAdminAuth() {
+            const adminEmail = sessionStorage.getItem('adminEmail');
+            const isAdmin = sessionStorage.getItem('isAdmin');
+            
+            if (!adminEmail || isAdmin !== 'true') {
+                // Not logged in as admin, redirect to admin login
+                addLog('❌ No admin session found. Redirecting to admin login...');
+                setTimeout(() => {
+                    window.location.href = 'admin-login.html';
+                }, 1500);
+                return false;
+            }
+
+            addLog('Admin session verified for: ' + adminEmail);
+            return true;
+        }
+
+        // Show access denied message
+        function showAccessDenied() {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.innerHTML = `
+                    <div style="text-align: center; padding: 4rem 2rem;">
+                        <div style="font-size: 4rem; color: #ff4d4d; margin-bottom: 1rem;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h2 style="color: white; margin-bottom: 1rem;">Access Denied</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                            You do not have permission to access the admin panel.<br>
+                            Only authorized administrators can view this page.
+                        </p>
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="login.html" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                            <a href="index.html" class="btn btn-outline">
+                                <i class="fas fa-home"></i> Go Home
+                            </a>
+                        </div>
+                        <div style="margin-top: 2rem; padding: 1rem; background: rgba(255, 77, 77, 0.1); border-radius: 8px; border: 1px solid rgba(255, 77, 77, 0.3);">
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                                <strong>Need admin access?</strong><br>
+                                Contact your system administrator to request admin privileges.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Logout admin
+        function logoutAdmin() {
+            // Clear admin session
+            sessionStorage.removeItem('adminEmail');
+            sessionStorage.removeItem('adminRole');
+            sessionStorage.removeItem('adminLoginTime');
+            sessionStorage.removeItem('isAdmin');
+            
+            addLog('Admin logged out');
+            
+            // Redirect to admin login
+            window.location.href = 'admin-login.html';
+        }
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', async function () {
+            addLog('Admin panel loading...');
+            
+            // Check admin authentication first
+            const isAdmin = await checkAdminAuth();
+            
+            if (isAdmin) {
+                addLog('Admin panel initialized');
+                checkSystemStatus();
+                loadPaymentRequests();
+            } else {
+                // Don't initialize admin features if not admin
+                return;
+            }
+        });
+    </script>
+</body>
+
+</html>

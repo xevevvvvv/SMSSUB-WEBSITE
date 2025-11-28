@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Credits - Ticketmaster Pro</title>
+    <link rel="icon" href="../assets/icon.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav-container">
+            <div class="logo">
+                <i class="fas fa-ticket-alt"></i> TM Pro
+            </div>
+            <nav class="nav">
+                <!-- Mobile menu toggle could go here -->
+            </nav>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-primary">Login / Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text animate-fade-in">
+                <h1>Send Tickets via SMS <br>Instantly & Securely</h1>
+                <p>Upgrade your transfer experience. Send tickets directly to phone numbers with our premium SMS
+                    gateway. No more lost emails.</p>
+
+                <!-- Interactive Demo Input -->
+                <div class="demo-input-container"
+                    style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 2rem; max-width: 400px;">
+                    <label
+                        style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Try
+                        the Live Demo</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="tel" id="demoPhone" placeholder="(555) 123-4567"
+                            style="flex: 1; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: white;">
+                        <button class="btn btn-primary" onclick="runDemo()" id="demoBtn">Send</button>
+                    </div>
+                    <div id="demoStatus"
+                        style="font-size: 0.8rem; margin-top: 0.5rem; min-height: 1.2em; color: #00ff88; opacity: 0; transition: opacity 0.3s;">
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <a href="login.html" class="btn btn-primary"
+                        style="background: var(--accent-color); color: black;">Get Started</a>
+                    <a href="#how-it-works" class="btn btn-outline" style="margin-left: 1rem;">Learn More</a>
+                </div>
+
+                <!-- Social Proof Ticker -->
+                <div
+                    style="margin-top: 2rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    <span
+                        style="display: inline-block; width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88;"></span>
+                    <span><strong style="color: white;">245 tickets</strong> transferred in the last hour</span>
+                </div>
+            </div>
+
+            <div class="hero-visual animate-float">
+                <div class="phone-mockup" id="demoPhoneMockup">
+                    <div class="phone-screen">
+                        <!-- Simulated App UI -->
+                        <div
+                            style="background: #026cdf; height: 60px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            Ticketmaster
+                        </div>
+                        <div style="padding: 20px; height: calc(100% - 60px); overflow: hidden; position: relative;">
+                            <div style="background: #f4f4f4; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                                <div style="font-size: 12px; color: #666;">To: (555) 123-4567</div>
+                                <div style="font-weight: bold; margin-top: 5px;">2 Tickets Sent! 🎟️</div>
+                            </div>
+
+                            <!-- Demo Message (Hidden initially) -->
+                            <div id="demoMessage"
+                                style="background: #e6f4ff; border-radius: 12px; padding: 15px; border-left: 4px solid #026cdf; transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                                <div style="font-size: 12px; color: #026cdf; font-weight: bold;">SMS DELIVERED</div>
+                                <div style="font-size: 11px; color: #333; margin-top: 5px;">Your tickets for Taylor
+                                    Swift have been sent to <span id="demoPhoneDisplay">...</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Simulated Notification (Hidden initially) -->
+                        <div id="demoNotification"
+                            style="position: absolute; top: 20%; left: 50%; transform: translateX(-50%) translateY(-20px); width: 90%; background: rgba(15, 16, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: all 0.4s ease;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-check-circle" style="color: #00ff88;"></i>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: bold;">Transfer Successful</div>
+                                    <div style="font-size: 10px; opacity: 0.8;">SMS sent successfully</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2>Simple, Transparent Pricing</h2>
+                <p style="font-size: 1.1rem; color: var(--primary-light); margin-top: 0.5rem;"><strong>$1 per SMS</strong> - Pay only for what you use</p>
+                <p style="margin-top: 0.5rem;">Choose a suggested package or enter any amount (minimum $5)</p>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Basic Plan -->
+                <div class="card pricing-card">
+                    <h3>Starter</h3>
+                    <div class="price">$5 <span>/ 5 SMS</span></div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">$1 per SMS</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 5 SMS Transfers</li>
+                        <li><i class="fas fa-check"></i> Instant Delivery</li>
+                        <li><i class="fas fa-check"></i> Basic Support</li>
+                    </ul>
+                    <button class="btn btn-outline" style="width: 100%;"
+                        onclick="selectPackage(5, 'Starter')">Select Starter</button>
+                </div>
+
+                <!-- Standard Plan -->
+                <div class="card pricing-card featured">
+                    <div
+                        style="position: absolute; top: 0; right: 0; background: var(--primary-color); color: white; padding: 5px 15px; font-size: 0.8rem; border-bottom-left-radius: 10px;">
+                        POPULAR</div>
+                    <h3>Pro</h3>
+                    <div class="price">$20 <span>/ 20 SMS</span></div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">$1 per SMS</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 20 SMS Transfers</li>
+                        <li><i class="fas fa-check"></i> Priority Delivery</li>
+                        <li><i class="fas fa-check"></i> Delivery Status Tracking</li>
+                        <li><i class="fas fa-check"></i> Premium Support</li>
+                    </ul>
+                    <button class="btn btn-primary" style="width: 100%;"
+                        onclick="selectPackage(20, 'Pro')">Select Pro</button>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="card pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">$60 <span>/ 60 SMS</span></div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">$1 per SMS</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 60 SMS Transfers</li>
+                        <li><i class="fas fa-check"></i> Bulk Transfer Tools</li>
+                        <li><i class="fas fa-check"></i> API Access</li>
+                        <li><i class="fas fa-check"></i> 24/7 Dedicated Support</li>
+                    </ul>
+                    <button class="btn btn-outline" style="width: 100%;"
+                        onclick="selectPackage(60, 'Enterprise')">Select Enterprise</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="section" style="background: rgba(255,255,255,0.02);">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2>How It Works</h2>
+                <p>Three simple steps to start sending tickets via SMS.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div class="card" style="text-align: center;">
+                    <div
+                        style="width: 60px; height: 60px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 1.5rem;">
+                        1</div>
+                    <h3>Login</h3>
+                    <p>Sign in with your Ticketmaster account email to sync your profile.</p>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div
+                        style="width: 60px; height: 60px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 1.5rem;">
+                        2</div>
+                    <h3>Buy Credits</h3>
+                    <p>Purchase SMS credits securely using our payment gateway.</p>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div
+                        style="width: 60px; height: 60px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 1.5rem;">
+                        3</div>
+                    <h3>Send Tickets</h3>
+                    <p>Enter any mobile number in the transfer form. We handle the rest.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: #05080f; padding: 4rem 0; border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                <div class="logo">
+                    <i class="fas fa-ticket-alt"></i> TM Pro
+                </div>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Support</a>
+                </div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">
+                    &copy; 2025 Ticketmaster Pro. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
