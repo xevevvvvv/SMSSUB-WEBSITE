@@ -550,9 +550,17 @@
                             <td style="padding: 1rem; font-family: monospace;">${payment.txid.substring(0, 8)}...</td>
                             <td style="padding: 1rem;"><span style="background: rgba(255, 204, 0, 0.1); color: #ffcc00; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Pending</span></td>
                             <td style="padding: 1rem;">
-                                <button class="btn btn-primary" onclick="approvePayment('${payment.id}', '${payment.email}', ${payment.amount})" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
-                                    Approve
-                                </button>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn btn-primary" onclick="approvePayment('${payment.id}', '${payment.email}', ${payment.amount})" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                                        Approve
+                                    </button>
+                                    <button class="btn" onclick="rejectPayment('${payment.id}', '${payment.email}', ${payment.amount})" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background: #ff4d4d; color: white; border: none;">
+                                        Decline
+                                    </button>
+                                    <button class="btn" onclick="deletePayment('${payment.id}', '${payment.email}')" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background: #dc3545; color: white; border: none;">
+                                        Delete
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `).join('');
@@ -599,6 +607,76 @@
             } catch (error) {
                 addLog(`❌ Approval error: ${error.message}`);
                 alert('Error approving payment');
+            }
+        }
+
+        // Reject payment
+        async function rejectPayment(paymentId, email, amount) {
+            if (!confirm(`Decline payment of $${amount} for ${email}?`)) return;
+
+            addLog(`Declining payment for ${email}...`);
+
+            const adminEmail = sessionStorage.getItem('adminEmail');
+            if (!adminEmail) {
+                alert('Authentication required. Please login again.');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/reject-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId, adminEmail: adminEmail })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog(`✅ Payment declined for ${email}.`);
+                    loadPaymentRequests(); // Refresh list
+                } else {
+                    addLog(`❌ Decline failed: ${data.error}`);
+                    alert('Decline failed: ' + data.error);
+                }
+            } catch (error) {
+                addLog(`❌ Decline error: ${error.message}`);
+                alert('Error declining payment');
+            }
+        }
+
+        // Delete payment
+        async function deletePayment(paymentId, email) {
+            if (!confirm(`Delete payment record for ${email}? This action cannot be undone.`)) return;
+
+            addLog(`Deleting payment for ${email}...`);
+
+            const adminEmail = sessionStorage.getItem('adminEmail');
+            if (!adminEmail) {
+                alert('Authentication required. Please login again.');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/delete-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog(`✅ Payment deleted for ${email}.`);
+                    loadPaymentRequests(); // Refresh list
+                } else {
+                    addLog(`❌ Delete failed: ${data.error}`);
+                    alert('Delete failed: ' + data.error);
+                }
+            } catch (error) {
+                addLog(`❌ Delete error: ${error.message}`);
+                alert('Error deleting payment');
             }
         }
 

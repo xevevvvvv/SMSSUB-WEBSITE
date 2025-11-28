@@ -45,6 +45,12 @@ async function loadDashboard() {
     // Check for payment confirmations
     await checkPaymentConfirmations();
 
+    // Force refresh user data to get updated credits
+    const updatedUserData = await getUserData(userEmail);
+    if (updatedUserData) {
+        displayUserData(updatedUserData);
+    }
+
     // Start auto-refresh
     startAutoRefresh();
 }
@@ -63,7 +69,7 @@ async function getUserData(email) {
         const data = await response.json();
 
         if (data.success) {
-            return data.data;
+            return data.user || data.data; // Handle both response formats
         } else {
             console.error('Error getting user data:', data.error);
             return null;
@@ -490,6 +496,12 @@ async function checkPaymentConfirmations() {
             if (recentApproved.length > 0) {
                 const totalCredits = recentApproved.reduce((sum, p) => sum + Math.floor(p.amount), 0);
                 showNotification(`Payment approved! ${totalCredits} SMS credit${totalCredits > 1 ? 's' : ''} added to your account.`, 'success');
+                
+                // Immediately refresh user data to update credits display
+                const updatedUserData = await getUserData(userEmail);
+                if (updatedUserData) {
+                    displayUserData(updatedUserData);
+                }
             }
 
             // Update last checked timestamp

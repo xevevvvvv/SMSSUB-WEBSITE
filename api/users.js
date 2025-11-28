@@ -44,27 +44,45 @@ async function registerMainAppUser(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
     try {
-        const { email, firstName, lastName, phone } = req.body;
+        const { email, firstName, lastName, phone, name, location, country } = req.body;
 
         if (!email) {
             return res.status(400).json({ error: 'Email is required' });
         }
 
-        // Save to Firestore
-        await db.collection('users').doc(email).set({
+        // Handle both field formats (legacy: name, location, country | new: firstName, lastName, phone)
+        let finalFirstName = firstName || '';
+        let finalLastName = lastName || '';
+        let finalPhone = phone || '';
+
+        // If name is provided instead of firstName/lastName, parse it
+        if (name && !firstName) {
+            const nameParts = name.trim().split(' ');
+            finalFirstName = nameParts[0] || '';
+            finalLastName = nameParts.slice(1).join(' ') || '';
+        }
+
+        // Build document data, only including defined fields (no undefined values)
+        const userData = {
             email,
-            firstName,
-            lastName,
-            phone,
             updatedAt: new Date().toISOString()
-        }, { merge: true });
+        };
+
+        // Only add fields if they have values (avoid undefined)
+        if (finalFirstName) userData.firstName = finalFirstName;
+        if (finalLastName) userData.lastName = finalLastName;
+        if (finalPhone) userData.phone = finalPhone;
+
+        // Save to Firestore
+        await db.collection('users').doc(email).set(userData, { merge: true });
 
         return res.status(200).json({ success: true, message: 'User registered' });
     } catch (error) {
         console.error('Registration error:', {
             message: error.message,
             code: error.code,
-            stack: error.stack
+            stack: error.stack,
+            body: req.body // Log the request body for debugging
         });
         return res.status(500).json({ error: 'Internal server error' });
     }

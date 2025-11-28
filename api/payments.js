@@ -22,6 +22,10 @@ export default async function handler(req, res) {
             return submitPayment(req, res);
         case 'approve-payment':
             return approvePayment(req, res);
+        case 'reject-payment':
+            return rejectPayment(req, res);
+        case 'delete-payment':
+            return deletePayment(req, res);
         case 'get-pending-payments':
             return getPendingPayments(req, res);
         case 'get-user-payments':
@@ -114,6 +118,68 @@ async function approvePayment(req, res) {
         return res.status(200).json({ success: true, message: 'Payment approved and credits added' });
     } catch (error) {
         console.error('Approve payment error:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+// --- Reject Payment ---
+async function rejectPayment(req, res) {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    try {
+        const { paymentId, adminEmail } = req.body;
+        if (!paymentId) return res.status(400).json({ error: 'Payment ID required' });
+
+        const paymentRef = db.collection('payments').doc(paymentId);
+        const paymentDoc = await paymentRef.get();
+
+        if (!paymentDoc.exists) return res.status(404).json({ error: 'Payment not found' });
+        const paymentData = paymentDoc.data();
+
+        if (paymentData.status === 'rejected') return res.status(400).json({ error: 'Already rejected' });
+        if (paymentData.status === 'approved') return res.status(400).json({ error: 'Cannot reject approved payment' });
+
+        // Update payment status to rejected
+        await paymentRef.update({
+            status: 'rejected',
+            rejectedBy: adminEmail || 'admin',
+            rejectedAt: new Date().toISOString()
+        });
+
+        return res.status(200).json({ success: true, message: 'Payment rejected' });
+    } catch (error) {
+        console.error('Reject payment error:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+// --- Delete Payment ---
+async function deletePayment(req, res) {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    try {
+        const { paymentId } = req.body;
+        if (!paymentId) return res.status(400).json({ error: 'Payment ID required' });
+
+        const paymentRef = db.collection('payments').doc(paymentId);
+        const paymentDoc = await paymentRef.get();
+
+        if (!paymentDoc.exists) return res.status(404).json({ error: 'Payment not found' });
+
+        // Delete the payment document
+        await paymentRef.delete();
+
+        return res.status(200).json({ success: true, message: 'Payment deleted' });
+    } catch (error) {
+        console.error('Delete payment error:', {
             message: error.message,
             code: error.code,
             stack: error.stack

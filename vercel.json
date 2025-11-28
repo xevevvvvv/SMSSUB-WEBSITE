@@ -33,6 +33,14 @@
       "destination": "/api/payments?action=approve-payment"
     },
     {
+      "source": "/api/reject-payment",
+      "destination": "/api/payments?action=reject-payment"
+    },
+    {
+      "source": "/api/delete-payment",
+      "destination": "/api/payments?action=delete-payment"
+    },
+    {
       "source": "/api/get-pending-payments",
       "destination": "/api/payments?action=get-pending-payments"
     },
