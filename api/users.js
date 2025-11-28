@@ -28,6 +28,8 @@ export default async function handler(req, res) {
             return validateUser(req, res);
         case 'get-user-data':
             return getUserData(req, res);
+        case 'get-all-users':
+            return getAllUsers(req, res);
         case 'check-admin':
             return checkAdmin(req, res);
         case 'admin-login':
@@ -100,6 +102,40 @@ async function getUserData(req, res) {
         return res.status(200).json({ success: true, user: doc.data() });
     } catch (error) {
         console.error('Get user data error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+// --- Get All Users ---
+async function getAllUsers(req, res) {
+    if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    try {
+        const usersSnapshot = await db.collection('users').get();
+        const users = [];
+
+        usersSnapshot.forEach(doc => {
+            const userData = doc.data();
+            users.push({
+                email: doc.id,
+                ...userData
+            });
+        });
+
+        // Sort by createdAt (newest first) or updatedAt
+        users.sort((a, b) => {
+            const dateA = a.createdAt || a.updatedAt || '';
+            const dateB = b.createdAt || b.updatedAt || '';
+            return dateB.localeCompare(dateA);
+        });
+
+        return res.status(200).json({ 
+            success: true, 
+            users: users,
+            count: users.length 
+        });
+    } catch (error) {
+        console.error('Get all users error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 }

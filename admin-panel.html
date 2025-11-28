@@ -194,6 +194,22 @@
                     <p>Manage users and validate access.</p>
                 </header>
 
+                <!-- Users List -->
+                <div class="card animate-fade-in" style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">Registered Users</h3>
+                        <button class="btn btn-outline" onclick="loadAllUsers()" style="padding: 0.4rem 1rem;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="usersList" style="min-height: 200px;">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            <i class="fas fa-spinner fa-spin"></i> Loading users...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Validation Test -->
                 <div class="card animate-fade-in">
                     <h3 style="margin-bottom: 1rem;">User Validation Test</h3>
                     <div class="input-group">
@@ -220,7 +236,7 @@
                         <div>
                             <div style="color: var(--text-secondary); font-size: 0.9rem;">Main App URL</div>
                             <div style="font-family: monospace; color: var(--primary-light);" id="mainAppUrl">
-                                http://localhost:3000</div>
+                                https://updated-tm-clone-tw14.vercel.app</div>
                         </div>
                         <div>
                             <div style="color: var(--text-secondary); font-size: 0.9rem;">Validation Endpoint</div>
@@ -259,6 +275,78 @@
             if (element) {
                 element.classList.add('active');
             }
+
+            // Load users when User Management section is opened
+            if (sectionId === 'users') {
+                loadAllUsers();
+            }
+        }
+
+        // Load user count for dashboard
+        async function loadUserCount() {
+            try {
+                const response = await fetch('/api/get-all-users');
+                const data = await response.json();
+
+                if (data.success && data.count !== undefined) {
+                    document.getElementById('userCount').querySelector('.status-number').textContent = data.count;
+                }
+            } catch (error) {
+                console.error('Error loading user count:', error);
+            }
+        }
+
+        // Load all users
+        async function loadAllUsers() {
+            const usersListDiv = document.getElementById('usersList');
+            usersListDiv.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>';
+
+            try {
+                const response = await fetch('/api/get-all-users');
+                const data = await response.json();
+
+                if (data.success && data.users) {
+                    if (data.users.length === 0) {
+                        usersListDiv.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No users registered yet.</div>';
+                        return;
+                    }
+
+                    let html = '<table style="width: 100%; border-collapse: collapse;">';
+                    html += '<thead><tr style="border-bottom: 1px solid var(--border-color);">';
+                    html += '<th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Email</th>';
+                    html += '<th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Name</th>';
+                    html += '<th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">SMS Credits</th>';
+                    html += '<th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registered</th>';
+                    html += '</tr></thead><tbody>';
+
+                    data.users.forEach(user => {
+                        const name = user.firstName && user.lastName 
+                            ? `${user.firstName} ${user.lastName}` 
+                            : (user.firstName || user.lastName || 'N/A');
+                        const credits = user.smsCredits !== undefined ? user.smsCredits : 0;
+                        const registered = user.createdAt || user.updatedAt || 'N/A';
+                        const date = registered !== 'N/A' ? new Date(registered).toLocaleDateString() : 'N/A';
+
+                        html += '<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">';
+                        html += `<td style="padding: 0.75rem;">${user.email}</td>`;
+                        html += `<td style="padding: 0.75rem;">${name}</td>`;
+                        html += `<td style="padding: 0.75rem; color: ${credits > 0 ? '#00ff88' : '#ff4d4d'};">${credits}</td>`;
+                        html += `<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.9rem;">${date}</td>`;
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table>';
+                    usersListDiv.innerHTML = html;
+
+                    // Update user count on dashboard
+                    document.getElementById('userCount').querySelector('.status-number').textContent = data.count;
+                } else {
+                    usersListDiv.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff4d4d;">Error loading users: ' + (data.error || 'Unknown error') + '</div>';
+                }
+            } catch (error) {
+                usersListDiv.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff4d4d;">Error: ' + error.message + '</div>';
+                console.error('Error loading users:', error);
+            }
         }
 
         // System status checking
@@ -267,7 +355,7 @@
 
             // Check main app connection
             try {
-                const response = await fetch('http://localhost:3000/api/check-env');
+                const response = await fetch('https://updated-tm-clone-tw14.vercel.app/api/check-env');
                 const data = await response.json();
 
                 updateStatusCard('mainAppStatus', '<i class="fas fa-check-circle"></i>', 'Main App Connected', 'success');
@@ -290,7 +378,7 @@
             addLog('Testing main app connection...');
 
             try {
-                const response = await fetch('http://localhost:3000/api/check-env');
+                const response = await fetch('https://updated-tm-clone-tw14.vercel.app/api/check-env');
                 const data = await response.json();
 
                 if (data.status === 'success') {
@@ -311,7 +399,7 @@
             addLog('Testing SMS system...');
 
             try {
-                const response = await fetch('http://localhost:3000/api/send-sms', {
+                const response = await fetch('https://updated-tm-clone-tw14.vercel.app/api/send-sms', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -360,7 +448,7 @@
             addLog('Testing email validation for: ' + email);
 
             try {
-                const response = await fetch('http://localhost:3000/api/validate-email-from-main-app', {
+                const response = await fetch('https://updated-tm-clone-tw14.vercel.app/api/validate-email-from-main-app', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -567,6 +655,8 @@
                 addLog('Admin panel initialized');
                 checkSystemStatus();
                 loadPaymentRequests();
+                // Load user count for dashboard
+                loadUserCount();
             } else {
                 // Don't initialize admin features if not admin
                 return;
