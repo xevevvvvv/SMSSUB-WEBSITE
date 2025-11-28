@@ -10,8 +10,8 @@
     { "src": "/(.*)", "dest": "/index.html" }
   ],
   "functions": {
-    "api/**/*.js": {
-      "includeFiles": ["lib/**"]
+    "api/*.js": {
+      "includeFiles": "lib/**"
     }
   }
 }
