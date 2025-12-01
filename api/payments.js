@@ -1,5 +1,5 @@
 import { db } from './lib/firebase.js';
-import { sendTelegramNotification } from './lib/telegram.js';
+import { sendTelegramNotification, sendPaymentNotificationWithButtons } from './lib/telegram.js';
 import admin from 'firebase-admin';
 
 export default async function handler(req, res) {
@@ -52,19 +52,11 @@ async function submitPayment(req, res) {
             createdAt: new Date().toISOString()
         };
 
-        await db.collection('payments').add(paymentData);
+        const paymentRef = await db.collection('payments').add(paymentData);
+        const paymentId = paymentRef.id;
 
-        // Telegram Notification
-        const message = `
-<b>💰 New Payment Request!</b>
-
-<b>User:</b> ${email}
-<b>Amount:</b> $${amount}
-<b>TXID:</b> <code>${txid}</code>
-
-<i>Check Admin Panel to approve.</i>
-        `;
-        sendTelegramNotification(message).catch(console.error);
+        // Telegram Notification with inline buttons
+        sendPaymentNotificationWithButtons(email, amount, txid, paymentId).catch(console.error);
 
         return res.status(200).json({ success: true, message: 'Payment submitted' });
     } catch (error) {
@@ -115,6 +107,17 @@ async function approvePayment(req, res) {
             }, { merge: true });
         });
 
+        // Telegram Notification for payment approval
+        const message = `
+✅ <b>Payment Approved!</b>
+
+<b>User:</b> ${userEmail}
+<b>Amount:</b> $${paymentData.amount}
+<b>Credits Added:</b> ${creditsToAdd} SMS
+<b>Approved By:</b> ${adminEmail || 'admin'}
+        `;
+        sendTelegramNotification(message).catch(console.error);
+
         return res.status(200).json({ success: true, message: 'Payment approved and credits added' });
     } catch (error) {
         console.error('Approve payment error:', {
@@ -149,6 +152,17 @@ async function rejectPayment(req, res) {
             rejectedBy: adminEmail || 'admin',
             rejectedAt: new Date().toISOString()
         });
+
+        // Telegram Notification for payment rejection
+        const message = `
+❌ <b>Payment Rejected</b>
+
+<b>User:</b> ${paymentData.email}
+<b>Amount:</b> $${paymentData.amount}
+<b>TXID:</b> <code>${paymentData.txid}</code>
+<b>Rejected By:</b> ${adminEmail || 'admin'}
+        `;
+        sendTelegramNotification(message).catch(console.error);
 
         return res.status(200).json({ success: true, message: 'Payment rejected' });
     } catch (error) {

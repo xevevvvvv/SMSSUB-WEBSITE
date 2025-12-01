@@ -59,6 +59,10 @@
     {
       "source": "/api/deduct-sms-credit",
       "destination": "/api/sms?action=deduct-sms-credit"
+    },
+    {
+      "source": "/api/telegram-webhook",
+      "destination": "/api/telegram-webhook.js"
     }
   ]
 }
