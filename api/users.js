@@ -3,6 +3,7 @@ import { db } from './lib/firebase.js';
 // and to avoid issues if the file is missing (though it should be there).
 // Actually, standard import is fine since it's bundled.
 import { verifyPassword } from './lib/password.js';
+import { sendTelegramNotification } from './lib/telegram.js';
 
 export default async function handler(req, res) {
     // Set CORS headers
@@ -77,6 +78,18 @@ async function registerMainAppUser(req, res) {
 
         // Save to Firestore
         await db.collection('users').doc(email).set(userData, { merge: true });
+
+        // Telegram Notification for new user registration
+        const fullName = [finalFirstName, finalLastName].filter(Boolean).join(' ') || 'N/A';
+        const phoneDisplay = finalPhone || 'N/A';
+        const message = `
+👤 <b>New User Registration!</b>
+
+<b>Email:</b> ${email}
+<b>Name:</b> ${fullName}
+<b>Phone:</b> ${phoneDisplay}
+        `;
+        sendTelegramNotification(message).catch(console.error);
 
         return res.status(200).json({ success: true, message: 'User registered' });
     } catch (error) {
