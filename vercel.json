@@ -62,7 +62,7 @@
     },
     {
       "source": "/api/telegram-webhook",
-      "destination": "/api/telegram-webhook.js"
+      "destination": "/api/telegram-webhook"
     }
   ]
 }

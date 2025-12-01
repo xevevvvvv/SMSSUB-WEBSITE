@@ -3,6 +3,11 @@ import { sendTelegramNotification, sendPendingPaymentReminder } from './lib/tele
 import admin from 'firebase-admin';
 
 export default async function handler(req, res) {
+    console.log('=== TELEGRAM WEBHOOK CALLED ===');
+    console.log('Method:', req.method);
+    console.log('URL:', req.url);
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -20,18 +25,31 @@ export default async function handler(req, res) {
     try {
         const update = req.body;
 
+        if (!update) {
+            console.error('No update in request body');
+            return res.status(400).json({ error: 'No update provided' });
+        }
+
         // Handle callback queries (button clicks)
         if (update.callback_query) {
+            console.log('Handling callback query:', update.callback_query.data);
             await handleCallbackQuery(update.callback_query);
             return res.status(200).json({ ok: true });
         }
 
         // Handle commands (text messages starting with /)
-        if (update.message && update.message.text && update.message.text.startsWith('/')) {
-            await handleCommand(update.message);
-            return res.status(200).json({ ok: true });
+        if (update.message && update.message.text) {
+            const text = update.message.text;
+            console.log('Received message:', text);
+            
+            if (text.startsWith('/')) {
+                console.log('Handling command:', text);
+                await handleCommand(update.message);
+                return res.status(200).json({ ok: true });
+            }
         }
 
+        console.log('Update type not recognized, returning ok');
         return res.status(200).json({ ok: true });
     } catch (error) {
         console.error('Telegram webhook error:', error);
@@ -83,10 +101,18 @@ async function handleCommand(message) {
     const chatId = chat.id;
     const command = text.split(' ')[0].toLowerCase();
 
+    console.log(`Handling command: ${command} from chatId: ${chatId}`);
+
     // Verify admin chat ID
     const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    if (!adminChatId) {
+        console.error('TELEGRAM_ADMIN_CHAT_ID not set!');
+        return;
+    }
+    
     if (chatId.toString() !== adminChatId) {
-        await sendTelegramNotification("❌ Unauthorized access. Only admins can use commands.");
+        console.log(`Unauthorized access attempt from chatId: ${chatId}, expected: ${adminChatId}`);
+        await sendTelegramNotification("❌ Unauthorized access. Only admins can use commands.", { chatId });
         return;
     }
 
@@ -564,11 +590,13 @@ ${pendingPayments > 0 ? '⚠️ <b>Action Required:</b> ' + pendingPayments + ' 
 
 // Send help message
 async function sendHelpMessage(chatId) {
+    console.log('Sending help message to chatId:', chatId);
     const message = `
 🤖 <b>Telegram Bot Commands</b>
 
 <b>Payment Management:</b>
 /pending - List pending payments
+/pending_alert - Alert about pending payments
 /approve &lt;id&gt; - Approve payment
 /reject &lt;id&gt; - Reject payment
 /delete_payment &lt;id&gt; - Delete payment
@@ -583,10 +611,11 @@ async function sendHelpMessage(chatId) {
 
 <b>Help:</b>
 /help - Show this message
+/start - Show this message
 
 <b>Note:</b> You can also use buttons in payment notifications to approve/reject directly.
     `;
-    await sendTelegramNotification(message);
+    await sendTelegramNotification(message, { chatId });
 }
 
 // Answer callback query
