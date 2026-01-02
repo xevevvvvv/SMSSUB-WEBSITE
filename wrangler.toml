@@ -3,13 +3,5 @@ name = "smssub-website"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# REQUIRED: Output directory for Pages
+# Output directory for Pages (required for wrangler.toml to be recognized)
 pages_build_output_dir = "."
-
-# Build command to install dependencies
-[build]
-  command = "npm install"
-
-# Local development
-[dev]
-  port = 8788
