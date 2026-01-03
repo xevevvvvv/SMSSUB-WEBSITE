@@ -622,7 +622,12 @@ a:hover {
 
     .main-content {
         padding: 1rem;
+        padding-left: 3.5rem; /* Leave space for hamburger menu */
         width: 100%;
+    }
+
+    .main-content header h2 {
+        padding-left: 0; /* Header text now has room */
     }
 
     /* Mobile Menu Toggle */
